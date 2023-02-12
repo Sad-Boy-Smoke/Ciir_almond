@@ -14,10 +14,7 @@
 		  <child link="base_link" />
 		  <origin xyz="0 0 -0.0288" rpy="0 0 0" />
 		</joint>
-
-<!-- i nichego ne budu delat 
-Sasha loh-->
-
+    
 <!-- **************************************************** ROBOT BASE ****************************************************  -->
 
   <link name="base_link">
@@ -117,7 +114,7 @@ Sasha loh-->
       velocity="0" />
   </joint>
 
-<!-- ****************************************************  FRONT LEFT WHEEL LINK **************************************************** -->
+<!-- **************************************************** FRONT LEFT WHEEL LINK **************************************************** -->
 
   <link
    name="Fl_wheel_Link">
@@ -160,7 +157,7 @@ Sasha loh-->
     </collision>
   </link>
   
-<!-- ****************************************************  FRONT LEFT WHEEL JOINT **************************************************** -->
+<!-- **************************************************** FRONT LEFT WHEEL JOINT **************************************************** -->
 
   <joint
    name="Fl_wheel_Joint"
@@ -308,80 +305,73 @@ Sasha loh-->
       effort="0"
       velocity="0" />
   </joint>
-  
-<!-- **************************************************** Skid Steering Drive **************************************************** -->
 
- <!-- <gazebo>
-  <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
-    <updateRate>100.0</updateRate>
-    <robotNamespace>sasha_ebach_nihuia_ne_ob]esnil</robotNamespace>
-    <leftFrontJoint>fl_wheel_joint</leftFrontJoint>
-    <rightFrontJoint>fr_wheel_joint</rightFrontJoint>
-    <leftRearJoint>bl_wheel_joint</leftRearJoint>
-    <rightRearJoint>br_wheel_joint</rightRearJoint>
-    <wheelSeparation>0.4</wheelSeparation>
-    <wheelDiameter>0.215</wheelDiameter>
-    <robotBaseFrame>base_link</robotBaseFrame>
-    <torque>1</torque>
-    <topicName>cmd_vel</topicName>
-    <broadcastTF>false</broadcastTF>
-  </plugin>
-</gazebo> -->
+<!-- **************************************************** LIDAR **************************************************** -->
 
-<!-- **************************************************** Skid Steering Drive **************************************************** -->
-
-<!-- <gazebo>
-    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>30</updateRate>
-          <legacyMode>false</legacyMode>
-      <leftJoint>fl_wheel_joint</leftJoint>
-      <rightJoint>fr_wheel_joint</rightJoint>
-      <wheelSeparation>0.25</wheelSeparation>
-      <wheelDiameter>0.28</wheelDiameter>
-      <torque>10</torque>
-      <commandTopic>cmd_vel</commandTopic>
-      <odometryTopic>odom</odometryTopic>
-      <odometryFrame>odom</odometryFrame>
-      <robotBaseFrame>base_link</robotBaseFrame>
-      <rosDebugLevel>1</rosDebugLevel>
-      <publishWheelTF>true</publishWheelTF>
-      <publishWheelJointState>true</publishWheelJointState>
-      <wheelTorque>20</wheelTorque>
-    </plugin>
-  </gazebo> -->
-
-
-
-   <!-- **************************************************** LIDAR PLUGIN ****************************************************
-	<joint name="hokuyo_joint" type="fixed">
+	<joint name="lidar_joint" type="fixed">
     <axis xyz="0 1 0" />
-    <origin xyz="0 0 ${height3 - axel_offset/2}" rpy="0 0 0"/>
-    <parent link="link3"/>
-    <child link="hokuyo_link"/>
+    <parent link="base_link"/>
+    <child link="lidar"/>
   </joint>
-  <link name="hokuyo_link">
+
+  <link name="lidar">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
     <box size="0.1 0.1 0.1"/>
       </geometry>
     </collision>
+
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0.028 0 0.023" rpy="6.2832 3.1416 1.5708"/>
       <geometry>
         <mesh filename="package://almond_sim/meshes/lidar.dae"/>
       </geometry>
     </visual>
+
     <inertial>
       <mass value="1e-5" />
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
     </inertial>
-  </link> -->
+  </link> 
 
-   <!-- **************************************************** IMU **************************************************** -->
-:
+<!-- **************************************************** HOKUYO LASER****************************************************-->
+
+  <gazebo reference="lidar">
+    <sensor type="ray" name="head_hokuyo_sensor">
+      <pose>0 0 -0.01 0 0 -1.130920</pose>
+      <visualize>true</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+         <horizontal>
+              <samples>666</samples>
+              <resolution>1.000000</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+        <topicName>scan</topicName>
+        <frameName>lidar</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+<!-- **************************************************** IMU **************************************************** -->
   <gazebo>
     <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>
@@ -393,6 +383,8 @@ Sasha loh-->
     </plugin>
   </gazebo>
 
+<!-- **************************************************** ODOMETRY **************************************************** -->
+
   <gazebo>
     <plugin name="object_controller" filename="libgazebo_ros_planar_move.so">
       <commandTopic>cmd_vel</commandTopic>
@@ -402,6 +394,8 @@ Sasha loh-->
       <robotBaseFrame>base_footprint</robotBaseFrame>
     </plugin>
   </gazebo>
+
+<!-- **************************************************** skid_steer_drive_controller **************************************************** -->
 
   <gazebo reference="base_link">
     <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
@@ -418,24 +412,6 @@ Sasha loh-->
       <topicName>cmd_vel</topicName>
       <broadcastTF>true</broadcastTF>
     </plugin>
-		<!-- <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-      <alwaysOn>true</alwaysOn>
-      <legacyMode>false</legacyMode>
-      <updateRate>20</updateRate>
-      <leftJoint>fl_wheel_joint</leftJoint>
-      <rightJoint>fl_wheel_joint</rightJoint>
-      <wheelSeparation>0.28</wheelSeparation>
-      <wheelDiameter>0.25</wheelDiameter>
-      <torque>20</torque>
-      <commandTopic>/cmd_vel</commandTopic>
-      <odometryTopic>/odom</odometryTopic>
-      <odometryFrame>odom</odometryFrame>
-      <robotBaseFrame>base_link</robotBaseFrame>
-      <publishWheelTF>false</publishWheelTF>
-      <publishWheelJointState>false</publishWheelJointState>
-      <odometrySource>world</odometrySource>
-      <publishTf>1</publishTf>
-		</plugin>  -->
 	</gazebo>
 
 </robot>

@@ -1,1 +1,1 @@
-controller_joint_names: ['', 'Bl_wheel_Joint', 'Fl_wheel_Joint', 'Fr_wheel_Joint', 'Br_wheel_Joint', ]
+controller_joint_names: ['', 'Bl_wheel_Joint', 'Fl_wheel_Joint', 'Fr_wheel_Joint', 'Br_wheel_Joint', 'hokuyo_joint']
